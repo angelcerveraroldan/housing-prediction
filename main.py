@@ -29,12 +29,16 @@ def data_accuracy(predictions, real):
     print(f"Differences excluding outliers: {np.average(differences_filter)}")
 
 
-def open_data():
+def open_data(path, t=False):
     """
     open the csv file and assign header names
     """
-    file = pd.read_csv(DATA_PATH)
-    file.columns = ['lat', 'lon', 'date', 'price', 'rooms']
+    file = pd.read_csv(path, header=None)
+
+    if t:
+        file.columns = ['lat', 'lon', 'date', 'rooms']
+    else:
+        file.columns = ['lat', 'lon', 'date', 'price', 'rooms']
 
     # Convert date column from string to datetime
     file.date = pd.to_datetime(file.date, dayfirst=True)
@@ -56,21 +60,53 @@ def split_data(file: pd.DataFrame):
     return train_test_split(
         file.drop(columns=['price']),  # Data excluding the price column
         file.price,  # Price column
-        test_size=0.1,  # Portion of data that will be used for test
+        test_size=0.2,  # Portion of data that will be used for test
         random_state=1,
     )
 
 
 def main():
     # Get data ready for algorithm
-    file = open_data()
+    file = open_data(DATA_PATH)
     X_train, X_test, y_train, y_test = split_data(file)
 
     # predictions = algos.neighbor_regressor.nearest_neighbors_regressor_log(10, X_train, y_train, X_test)
     predictions = algos.kmeans.main(X_train, X_test, y_train)
 
+    # Check accuracy of data
     data_accuracy(predictions, y_test.values)
 
 
+def predict():
+    """
+    This function is used to predict the actual data
+    """
+
+    # File used for training
+    file = open_data(DATA_PATH)
+
+    # New file (the one from whih we have to esimate prices)
+    n_f = open_data('/home/angelcr/programming/housing-prediction/data/house-test.csv', True)
+
+    # Divide training data into X and y
+    X, y = file.drop(columns=['price']), file['price'].values
+
+    # Array of predictions returned by the kmeans agorithm
+    predictions = algos.kmeans.main(X, n_f, y)
+
+    # Open the csv as a pandas dataframe (with no headers)
+    ans = pd.read_csv('/home/angelcr/programming/housing-prediction/data/house-test.csv', header=None)
+
+    # Give dataframe column names
+    ans.columns = ['lat', 'lon', 'date', 'rooms']
+
+    # Add the prices to the dataframe
+    ans['price'] = predictions
+
+    # Save the answer as a csv
+    ans.to_csv('answ_final.csv', index_label='index')
+
+
 if __name__ == '__main__':
-    main()
+    # main()
+    predict()

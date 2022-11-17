@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
 # Number of clusters into which we will divide ireland
-CLUSTER_NUM = 500
+CLUSTER_NUM = 800
 
 
 def cluster(df: pd.DataFrame):
@@ -22,7 +22,7 @@ def cluster(df: pd.DataFrame):
         init='random',
         n_clusters=CLUSTER_NUM,
         n_init=20,
-        max_iter=900
+        max_iter=500
     )
 
     kmeans.fit(cluster_on)
@@ -30,6 +30,17 @@ def cluster(df: pd.DataFrame):
     centroids = kmeans.cluster_centers_
 
     return centroids
+
+
+def dist(df: pd.DataFrame, cluster_centers):
+    distances = []
+    for _, row in df.iterrows():
+        # print(row.cluster)
+        # print(cluster_centers[row.cluster])
+        # print()
+        distances.append(math.dist([row.lat, row.lon], cluster_centers[int(row.cluster)]))
+
+    return distances
 
 
 def linear_regression(x, y):
@@ -54,6 +65,7 @@ def assign_cluster(df, centroids):
     Find the nearest cluster to each house
     """
     cluster_index = []
+    cluster_distance = []
     for _, row in df.iterrows():
         x = row.lat
         y = row.lon
@@ -66,8 +78,9 @@ def assign_cluster(df, centroids):
         index = distances.index(closest_point)
 
         cluster_index.append(index)
+        cluster_distance.append(closest_point)
 
-    return cluster_index
+    return cluster_index, cluster_distance
 
 
 def main(X_train, X_test, y_train):
@@ -80,7 +93,9 @@ def main(X_train, X_test, y_train):
 
     # Assign each residence a cluster
     centroids = cluster(X_train)
-    X_test['cluster'] = assign_cluster(X_test, centroids)
+
+    X_train['distance'] = dist(X_train, centroids)
+    X_test['cluster'], X_test['distance'] = assign_cluster(X_test, centroids)
 
     # Hot encode the clusters
     X_train = hot_encode(X_train)
