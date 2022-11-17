@@ -1,7 +1,7 @@
 from sklearn.neighbors import KNeighborsRegressor
 import pandas as pd
 
-ROWS = ['lan', 'lat', 'rooms', 'date']
+ROWS = ['lat', 'lon', 'rooms', 'date']
 
 
 def nearest_neighbors_regressor(n: int, X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame):

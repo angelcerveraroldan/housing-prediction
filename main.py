@@ -73,26 +73,40 @@ def main():
     # predictions = algos.neighbor_regressor.nearest_neighbors_regressor_log(10, X_train, y_train, X_test)
     predictions = algos.kmeans.main(X_train, X_test, y_train)
 
+    # Check accuracy of data
     data_accuracy(predictions, y_test.values)
 
 
 def predict():
+    """
+    This function is used to predict the actual data
+    """
+
+    # File used for training
     file = open_data(DATA_PATH)
+
+    # New file (the one from whih we have to esimate prices)
     n_f = open_data('/home/angelcr/programming/housing-prediction/data/house-test.csv', True)
 
+    # Divide training data into X and y
     X, y = file.drop(columns=['price']), file['price'].values
-    X.info()
-    n_f.info()
+
+    # Array of predictions returned by the kmeans agorithm
     predictions = algos.kmeans.main(X, n_f, y)
-    print(f"Number of prediction: {len(predictions)}")
+
+    # Open the csv as a pandas dataframe (with no headers)
     ans = pd.read_csv('/home/angelcr/programming/housing-prediction/data/house-test.csv', header=None)
+
+    # Give dataframe column names
     ans.columns = ['lat', 'lon', 'date', 'rooms']
+
+    # Add the prices to the dataframe
     ans['price'] = predictions
 
-    ans.info()
-
-    ans.to_csv('answ.csv', index_label='index')
+    # Save the answer as a csv
+    ans.to_csv('answ_final.csv', index_label='index')
 
 
 if __name__ == '__main__':
+    # main()
     predict()

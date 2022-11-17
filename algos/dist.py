@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
 # Number of clusters into which we will divide ireland
-CLUSTER_NUM = 800
+CLUSTER_NUM = 100
 
 
 def cluster(df: pd.DataFrame):
@@ -33,11 +33,12 @@ def cluster(df: pd.DataFrame):
 
 
 def dist(df: pd.DataFrame, cluster_centers):
+    """
+    Find the distances from each house to their nearest house (This function is to be used with the training data)
+    """
+    
     distances = []
     for _, row in df.iterrows():
-        # print(row.cluster)
-        # print(cluster_centers[row.cluster])
-        # print()
         distances.append(math.dist([row.lat, row.lon], cluster_centers[int(row.cluster)]))
 
     return distances
@@ -93,7 +94,7 @@ def main(X_train, X_test, y_train):
 
     # Assign each residence a cluster
     centroids = cluster(X_train)
-
+    print(centroids)
     X_train['distance'] = dist(X_train, centroids)
     X_test['cluster'], X_test['distance'] = assign_cluster(X_test, centroids)
 
