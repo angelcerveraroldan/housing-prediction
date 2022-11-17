@@ -6,7 +6,7 @@ from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
 # Number of clusters into which we will divide ireland
-CLUSTER_NUM = 500
+CLUSTER_NUM = 700
 
 
 def cluster(df: pd.DataFrame):
@@ -22,7 +22,7 @@ def cluster(df: pd.DataFrame):
         init='random',
         n_clusters=CLUSTER_NUM,
         n_init=20,
-        max_iter=900
+        max_iter=500
     )
 
     kmeans.fit(cluster_on)

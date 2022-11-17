@@ -29,12 +29,16 @@ def data_accuracy(predictions, real):
     print(f"Differences excluding outliers: {np.average(differences_filter)}")
 
 
-def open_data():
+def open_data(path, t=False):
     """
     open the csv file and assign header names
     """
-    file = pd.read_csv(DATA_PATH)
-    file.columns = ['lat', 'lon', 'date', 'price', 'rooms']
+    file = pd.read_csv(path, header=None)
+
+    if t:
+        file.columns = ['lat', 'lon', 'date', 'rooms']
+    else:
+        file.columns = ['lat', 'lon', 'date', 'price', 'rooms']
 
     # Convert date column from string to datetime
     file.date = pd.to_datetime(file.date, dayfirst=True)
@@ -56,14 +60,14 @@ def split_data(file: pd.DataFrame):
     return train_test_split(
         file.drop(columns=['price']),  # Data excluding the price column
         file.price,  # Price column
-        test_size=0.1,  # Portion of data that will be used for test
+        test_size=0.2,  # Portion of data that will be used for test
         random_state=1,
     )
 
 
 def main():
     # Get data ready for algorithm
-    file = open_data()
+    file = open_data(DATA_PATH)
     X_train, X_test, y_train, y_test = split_data(file)
 
     # predictions = algos.neighbor_regressor.nearest_neighbors_regressor_log(10, X_train, y_train, X_test)
@@ -72,5 +76,23 @@ def main():
     data_accuracy(predictions, y_test.values)
 
 
+def predict():
+    file = open_data(DATA_PATH)
+    n_f = open_data('/home/angelcr/programming/housing-prediction/data/house-test.csv', True)
+
+    X, y = file.drop(columns=['price']), file['price'].values
+    X.info()
+    n_f.info()
+    predictions = algos.kmeans.main(X, n_f, y)
+    print(f"Number of prediction: {len(predictions)}")
+    ans = pd.read_csv('/home/angelcr/programming/housing-prediction/data/house-test.csv', header=None)
+    ans.columns = ['lat', 'lon', 'date', 'rooms']
+    ans['price'] = predictions
+
+    ans.info()
+
+    ans.to_csv('answ.csv', index_label='index')
+
+
 if __name__ == '__main__':
-    main()
+    predict()
