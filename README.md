@@ -4,4 +4,3 @@
 
 ![clusters](docs/img.png)
 
-# Inflation
